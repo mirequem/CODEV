@@ -3,7 +3,7 @@
 !matrix of the results in a .txt file. The input wave of the system can be an OPU or a Gaussian beam.
 
 !Parameters
-^a == 7		!image surface number
+^a == 7			!image surface number
 ^m == 200		!number of surfaces (axial)
 ^c == 200		!number of points (radial)
 ^f == 0.02		!radial width [mm]
