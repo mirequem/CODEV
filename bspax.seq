@@ -1,0 +1,77 @@
+!Calculates the BSP for a set of planes between the last surface of the system and a given axial distance. 
+!Allows to reconstruct an axial intensity map of a beam over a given distance and to record a 
+!matrix of the results in a .txt file. The input wave of the system can be an OPU or a Gaussian beam.
+
+!Parameters
+^a == 7		!image surface number
+^m == 200		!number of surfaces (axial)
+^c == 200		!number of points (radial)
+^f == 0.02		!radial width [mm]
+^lo == 20		!axial distance[mm]
+
+^b == ^m + ^a	!final surface
+
+!temporary surfaces
+INS S^a..^b
+for ^n 1 ^m 1
+	^t == ^a + ^n -1 
+	THI  S^t ^lo/^m
+	CIR S^t 50
+end for
+^q == ^m + ^a
+CIR S^q 50
+
+!BSP initialization
+
+bsp
+
+!OPU: uncomment the two following lines
+!spx 3.5		!x beam radius
+!spy 3.5		!y beam radius
+
+!Gaussian beam: uncomment the two following lines and place object at a finite distance (no infinity distance)
+wrx 3.5		!x beam radius
+wry 3.5		!y beam radius
+
+!choose NFR value
+nri nfr 250		
+buf del b1
+buf del b4
+buf mov b1 j1 i1			!buffer creation 
+
+for ^n ^a ^b 1
+	int s^n unn  !dbu
+	gox s^n 0			!x coordinate where 2D graph is centered
+	goy s^n 0			!y coordinate where 2D graph is centered
+	gpx s^n 1			!number of sampled points (x)
+	gpy s^n ^c			!number of sampled points (y)
+	gwx s^n ^f/^c		!distance between the temporary surfaces
+	gwy s^n ^f
+	wbf int s^n b1
+	!buf lis b1
+end for
+
+go
+
+!matrix creation in buffer B4 with values of B1
+for ^n 1 ^m 1
+	buf mov b4 j^n  i1
+	^d== ^n*21 + (^n-1)*3 + (^n-1)* (^c-1)
+	^e== ^n*21 + (^n-1)*3 + ^n*(^c-1)
+	buf cop b1 i^d..^e
+end for
+
+!graphic 
+ugr
+	tit "Axial intensity"
+	uni 'mm' "um"
+	lti "Intensity"
+	gri ^lo/(^m-1) 1000*^f/(^c-1)
+	sfp b4 I1..^c J1..^m dis
+
+go				!BSP calculation
+
+del S^a..^b			!delete temporary surfaces
+
+!copy data into a .dat file
+buf exp b4 fichier
