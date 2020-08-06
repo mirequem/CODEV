@@ -30,8 +30,8 @@ bsp
 !spy 3.5		!y beam radius
 
 !Gaussian beam: uncomment the two following lines and place object at a finite distance (no infinity distance)
-wrx 3.5		!x beam radius
-wry 3.5		!y beam radius
+wrx 3.5			!x beam radius
+wry 3.5			!y beam radius
 
 !choose NFR value
 nri nfr 250		
