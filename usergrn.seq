@@ -1,0 +1,148 @@
+!modified version of the orignial macro usergn
+buf del b5
+buf imp b5 a2013B2.dat		!write file name of refractive index data file
+
+FCT @profil(num ^erx, num ^ery, num ^x, num ^y)
+	^cas ==3		!choose appropriate case
+	
+if ^cas =1			!hyperbolic secant model (exact)
+	^a == 0.5		!ring radius
+	^b==0.2346		!alpha parameter
+	^r == sqrtf((^x+^erx) * (^x+^erx) + (^y+^ery) * (^y+^ery)) 
+	^rs == ^b*(^r - ^a)
+	^rsq == ^rs * ^rs / 2
+	^rsq2 == 5 * ^rs * ^rs * ^rs * ^rs / 24
+	^temp   ==  1.0 - ^rsq + ^rsq2 !- 0.01*(1/(^r*10+0.5))
+
+
+else if ^cas=2		!lab data of a real preform
+	^r == sqrtf((^x+^erx) * (^x+^erx) + (^y+^ery) * (^y+^ery))
+	^m == roundf(^r / 0.0007) + 5225		!radial and scale adjustment
+	^temp ==((buf.num b5 i^m j2)+ 1.48) / 1.48
+
+end if
+end fct ^temp
+
+FCT @USERGRN(num ^brind, num ^udg_data(150), num ^s(3), num ^f(5))
+!*
+!* Purpose: Evaluates n and n*GRAD(n) of a user-defined index of
+!*          refraction gradient.  The function is of the form
+!*          n(x,y,z), where (x,y,z) are the cartesian coordinates
+!*          of a point in the gradient.  The origin of this
+!*          coordinate system is the vertex of the surface to which
+!*          the gradient is attached.  GRAD(n) is the three
+!*          derivatives of the function n, viz.,
+!*          (dn/dx, dn/dy, dn/dz).
+!*
+!* Parameters:
+!*   The following is a brief description of the parameters in the
+!*   call list.  If the parameter is designated as "input", its
+!*   value is passed to the subroutine by the calling program  if
+!*   it is designated as "output", its value is supposed to be
+!*   calculated or set by this subroutine and passed back to the
+!*   calling program.
+!*
+!*    BRIND  - The base index (input): This is entered in the
+!*             private catalog as the index of refraction.
+!*
+!*    ^udg_data   - The gradient coefficients (input): these are entered
+!*             in the private catalog as the coefficients.  For
+!*             example, ^udg_data(1) is entered with the command UDG C1,
+!*             ^udg_data(2) is entered with the command UDG C2, etc.
+!*
+!*    S      - The position vector (input): S is an array
+!*             containing the three components, (X,Y,Z), of the
+!*             position of a ray as it is traced Z is the optical
+!*             axis.
+!*
+!*    f(1)   - Error code (output): This is set to zero before this
+!*             subroutine is entered.  If there are any error
+!*             conditions which prevent normal completion of
+!*             the calculation (eg., negative SQRT, etc.),
+!*             KERROR should be set to a non-zero value.
+!*
+!*    f(2)   - The calculated index of refraction (output): This is
+!*             the calculated value of the index of refraction at
+!*             (X,Y,Z) using the equation programmed in this
+!*             subroutine.
+!*
+!*    f(3)  - The calculated n*GRAD(n) (output): XNGRAN is an
+!*    f(4)      array containing the three components of the
+!*    f(5)      calculated values of n*GRAD(n) at (X,Y,Z) using
+!*              the equation programmed in this subroutine.  Since
+!*              n*GRAD(n) is equivalent to 0.5*GRAD(n**2), either
+!*              form can be used, depending on which is more
+!*              convenient.
+
+num ^kerror
+num ^rindx
+num ^xngran(3)
+
+! Local variables 
+
+num ^temp
+num ^tempa
+num ^rsq
+!*
+!* Note: The following statements defining the type of the
+!*       variables in the call list must be left in the subroutine
+!*
+!* NOTE: The index of refraction is always calculated as a
+!*       positive quantity regardless of the direction of the
+!*       light.  The Z coordinate is positive in the direction of
+!*       the material regardless of the direction of the light.
+!*
+!* NOTE: From this point on, you will typically substitute
+!*       your C code for the particular gradient being
+!*       programmed
+!* 
+!*
+!* Sample calculation for Luneberg lens
+!* 
+^st == 0
+
+! Function Body 
+
+^kerror == ^f(1)
+!^step == 19							! nombre de step
+!^r == roundf(^r * ^step + 0.5) / (^step + 1) 	! pour avoir un step index
+	!^step == 19						! nombre de step
+	!^ra == (2*roundf(^r * ^step + 0.5)-1) / (2 * ^step )
+
+
+if (^udg_data(1) = 0.0)
+   	^kerror    == 1
+   	^xngran(1) == 0
+   	^xngran(2) == 0
+   	^xngran(3) == 0
+   	^rindx     == 0
+else
+	^temp   == @profil(0, 0, ^s(1), ^s(2))
+
+!derivé numérique
+
+	^er == 0.006
+	^tempx1 == @profil(^er, 0, ^s(1), ^s(2))
+	^tempx2 == @profil(-^er, 0, ^s(1), ^s(2))
+	^tempy1 == @profil(0, ^er, ^s(1), ^s(2))
+	^tempy2 == @profil(0, -^er, ^s(1), ^s(2))
+
+
+	^temp == ^temp * ^brind
+       ^rindx == ^temp
+       !^temp == ^brind * ^brind
+       !^xngran(1) == ^rindx * ^brind * ^b * (-( ^rs / ^r )* ^s(1) )!+ ^b * (^rs **3) * 5 / 6 / ^r * ^s(1))
+       !^xngran(2) == ^rindx * ^brind * ^b * (-( ^rs / ^r )* ^s(2) )!+ ^b * (^rs **3) * 5 / 6 / ^r * ^s(2))
+	^xngran(1) == ^rindx * ^brind * (^tempx1 - ^tempx2)/(2 * ^er)
+	^xngran(2) == ^rindx * ^brind * (^tempy1 - ^tempy2)/(2 * ^er)
+       ^xngran(3) == 0
+end if
+   
+! Index of refraction
+   ^f(1) == ^kerror
+   ^f(2) == ^rindx
+   ^f(3) == ^xngran(1)
+   ^f(4) == ^xngran(2)
+   ^f(5) == ^xngran(3)
+
+end fct ^kerror
