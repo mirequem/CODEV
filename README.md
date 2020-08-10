@@ -1,5 +1,5 @@
 # CODEV
-The codes in this repository are macros and complementary codes (often written in MATLAB language) for use with the [*CODE V* optical design software](https://www.synopsys.com/optical-solutions/codev.html). They have been written for very specific needs that will be detailed below. 
+The codes in this repository are macros and complementary codes for use with the [*CODE V* optical design software](https://www.synopsys.com/optical-solutions/codev.html). They have been written for very specific needs that will be detailed below. 
 
 ## `bspax.seq`
 
