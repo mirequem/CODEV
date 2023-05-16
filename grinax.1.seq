@@ -1,0 +1,97 @@
+!copier du CODE V Macro-PLUS Reference Manual : Chapter 5 CODE V Supplied Macros : User-Defined Features Macros
+!L'ouverture numerique doit être 4X le parametre b (dans usergrn) et le systéme en mm
+
+
+! Drop previous function definition and define new one.
+dro fct @usergrn
+dro fct @profil
+in cv_macro:usergrn
+
+
+! Define private glass with user gradient data
+PRV
+PWL 600 500 400! wavelengths
+'grin' 1.47 1.48 1.49 ! base index
+^a == 0.8 !facteur  de dimention
+UDG 
+UDG 0.02/^a
+UDG C1 0.4 ! parameter a
+UDG C2 0 ! parameter r
+end
+
+
+
+! Calculate grid of index values, store in buffer for plotting
+ver n
+^z == 0
+buf del b1..3
+buf mov b1 i1 j1
+buf mov b2 i1 j1
+for ^x -1/^a 1/^a .025/^a
+for ^y -1/^a 1/^a .025/^a
+if ^x**2 + ^y**2 < 1
+^n1 == index(1,1,1,1,^x,^y,^z)
+^n2 == index(1,1,1,1,^x,^y,^z+1)
+else
+^n1 == -99999
+^n2 == -99999
+end if
+buf put b1 ic jc ^n1
+buf mov b1 ic jc+1
+buf put b2 ic jc ^n2
+buf mov b2 ic jc+1
+end for
+buf mov b1 ic+1 j1
+buf mov b2 ic+1 j1
+end for
+
+
+! Calculate index values as a function of radial position
+for ^y 0 1/^a 0.00025/^a
+^x == 0
+^n1 == index(1,1,1,1,^x,^y,^z)
+^n2 == index(1,1,1,1,^x,^y,^z+1)
+buf put b3 il+1 ^y ^n1 ^y ^n2
+end for
+
+ver y ! Turn back on command echo
+
+^etat == 0 !pour tracer
+if ^etat = 1
+! Plot grid of index values at z=0
+ugr
+tit "Index map, z=0"
+uni 'mm' "mm"
+lti "Index"
+gri .025/^a
+lev num 99
+nda -99999
+sfp b1 ia ja dis
+go
+end if
+
+^etat == 1 !pour tracer
+if ^etat = 1
+! Plot grid of index values at z=1
+ugr
+tit "Index map, z=1"
+uni 'mm' "mm"
+lti "Index"
+gri .0025
+lev num 99
+nda -99999
+sfp b2 ia ja dis
+go
+end if
+
+^etat == 1 !pour tracer
+if ^etat = 1
+! Plot curve of index values vs. radial position
+ugr
+tit "Profil indice refraction radial"
+xla "Distance radiale (mm)"
+yla "Indice de refraction"
+dtb b3 ia j1..2 'z=0'
+dtb b3 ia j3..4 'z=1'
+go
+end if
