@@ -100,20 +100,22 @@ buf imp b5 filename.dat		!write file name of refractive index data file
 
 4. For the first use, a special glass must be imported into the catalogue. Choose Lens > Add Private Catalog Glass > Gradient Index... Choose "User defined" as the glass type. ***To complete***.
 
-5. In the `usergrn.seq`, choose case 1 and save the file. This step is very important because if the user choose case 2, the software will get into an infinite loop and a shut-down will be necessary. This bug needs to be fixed.
+5. In the `usergrn.seq`, choose case 1 and save the file. This step is very important because if the user choose case 2, the software will get into an infinite loop and a shut-down will be necessary. This bug needs to be fixed. Comment the line that imports the data from an expperimental index profile that is used in case 2 (line 2 of the code). 
 
-6. In the CODE V command line, type:
+6. Save the file grinax.seq in the working folder.
+
+7. . In the CODE V command line, type:
 ``` 
 in grinax
 ```
 A refractive index graph will appear, which will probably be a simple line. 
 
-7. In CODE V, open the .lens file in which the optical system is designed. The GRIN component must have the user-defined glass. 
+8. In CODE V, open the .lens file in which the optical system is designed. The GRIN component must have the user-defined glass. 
 
-8. In the command line, type again:
+9. In the command line, type again:
 ``` 
 in grinax
 ```
 The refractive index graph should appear again, but with the specified parameters of case 1. 
 
-9. In the `usergrn.seq`, change to case 2 if needed. Type again in the command line `in grinax` and the refractive index graph will appear for the case 2 parameters. 
+10. In the `usergrn.seq`, change to case 2 if needed. Type again in the command line `in grinax` and the refractive index graph will appear for the case 2 parameters. 
