@@ -100,11 +100,11 @@ buf imp b5 filename.dat		!write file name of refractive index data file
 
 4. For the first use, a special glass must be imported into the catalogue. Choose Lens > Add Private Catalog Glass > Gradient Index... Choose "User defined" as the glass type. ***To complete***.
 
-5. In the `usergrn.seq`, choose case 1 and save the file. This step is very important because if the user choose case 2, the software will get into an infinite loop and a shut-down will be necessary. This bug needs to be fixed. Comment the line that imports the data from an expperimental index profile that is used in case 2 (line 2 of the code). 
+5. In the `usergrn.seq`, choose case 1 and save the file. This step is very important because if the user choose case 2, the software will get into an infinite loop and a shut-down will be necessary. This bug needs to be fixed. Comment the line that imports the data from an experimental index profile, which is only used in case 2 (line 3 of the code). 
 
 6. Save the file grinax.seq in the working folder.
 
-7. . In the CODE V command line, type:
+7. In the CODE V command line, type:
 ``` 
 in grinax
 ```
